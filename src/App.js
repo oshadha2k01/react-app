@@ -1,25 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import products from './data/products';
+import ProductCard from './components/ProductCard';
+import Filter from './components/Filter';
 
-function App() {
+const categories = [...new Set(products.map(p => p.category))];
+
+const App = () => {
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  const filteredProducts = selectedCategory
+    ? products.filter(p => p.category === selectedCategory)
+    : products;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container">
+      <h2 className="mb-4 text-center">Product Store</h2>
+      <Filter
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+      />
+      <div className="row">
+        {filteredProducts.map(product => (
+          <ProductCard product={product} key={product.id} />
+        ))}
+      </div>
     </div>
   );
-}
+};
 
 export default App;
+
