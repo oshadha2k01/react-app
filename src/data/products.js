@@ -16,7 +16,7 @@ const products = [
   {
     id: 3,
     title: "Smart Watch",
-    price: 299,
+    price: 100,
     category: "Electronics",
     image: "https://wimaladharmaandsons.lk/cdn/shop/products/k_Q0IxtY_1_-Copy_4db34351-4f4a-4143-a448-3096a56c1dd2.png?v=1738150841"
   },
