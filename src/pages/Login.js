@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import PropTypes from 'prop-types';
 
 const validateUsername = username => {
   if (!username) return 'Username is required';
@@ -23,6 +24,8 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirect = searchParams.get('redirect');
 
   const handleUsernameChange = e => {
     setUsername(e.target.value);
@@ -55,7 +58,13 @@ const Login = () => {
           timer: 1500,
           showConfirmButton: false,
         });
-        setTimeout(() => navigate('/'), 1500);
+        setTimeout(() => {
+          if (redirect) {
+            navigate(redirect);
+          } else {
+            navigate('/');
+          }
+        }, 1500);
       } else {
         Swal.fire({
           icon: 'error',
@@ -110,6 +119,10 @@ const Login = () => {
       </form>
     </div>
   );
+};
+
+Login.propTypes = {
+  // If Login receives props, define them here. If not, leave this as an empty object.
 };
 
 export default Login;

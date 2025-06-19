@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import products from '../data/products';
 import Swal from 'sweetalert2';
 import { FaCreditCard, FaMoneyBillWave, FaRegCreditCard, FaTimesCircle } from 'react-icons/fa';
 import jsPDF from 'jspdf';
+import PropTypes from 'prop-types';
 
 const paymentOptions = [
   { value: 'credit', label: 'Credit Card', icon: <FaCreditCard /> },
@@ -33,6 +34,21 @@ const ProductDetails = () => {
     address: ''
   });
   const [billingErrors, setBillingErrors] = useState({});
+
+  const firstInputRef = useRef();
+
+  useEffect(() => {
+    if (showModal && firstInputRef.current) {
+      firstInputRef.current.focus();
+    }
+    function handleEsc(e) {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+      }
+    }
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [showModal]);
 
   if (!product) {
     return <div className="text-center mt-5">Product not found.</div>;
@@ -161,7 +177,7 @@ const ProductDetails = () => {
             <h3 className="card-title mb-3">{product.title}</h3>
             <h5 className="card-text mb-2 text-primary">${product.price}</h5>
             <div className="mb-2"><strong>Category:</strong> {product.category}</div>
-            <button className="btn btn-success w-100 mt-3" onClick={handleProcessBuy}>
+            <button className="btn btn-primary w-100 mt-3" onClick={handleProcessBuy}>
               Process to Buy
             </button>
           </div>
@@ -172,6 +188,9 @@ const ProductDetails = () => {
       {showModal && (
         <div
           className="modal fade show"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="billingModalTitle"
           style={{
             display: 'block',
             background: 'rgba(0,0,0,0.5)',
@@ -181,10 +200,10 @@ const ProductDetails = () => {
           }}
           tabIndex="-1"
         >
-          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 1100, margin: 'auto', width: '95%' }}>
-            <div className="modal-content" style={{ borderRadius: 18, boxShadow: '0 8px 32px rgba(24,90,219,0.15)' }}>
+          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 1100, width: '100%', maxWidth: '98vw', margin: 'auto' }}>
+            <div className="modal-content" style={{ borderRadius: 18, boxShadow: '0 8px 32px rgba(24,90,219,0.15)', padding: 16, maxHeight: '90vh', overflowY: 'auto' }}>
               <div className="modal-header border-0 pb-0" style={{ position: 'relative' }}>
-                <h4 className="modal-title fw-bold" style={{ color: '#185adb' }}>Billing & Confirmation</h4>
+                <h4 id="billingModalTitle" className="modal-title fw-bold" style={{ color: '#185adb' }}>Billing & Confirmation</h4>
                 <button
                   type="button"
                   className="btn btn-link p-0"
@@ -229,6 +248,7 @@ const ProductDetails = () => {
                       <div className="mb-2">
                         <label className="form-label">Full Name</label>
                         <input
+                          ref={firstInputRef}
                           type="text"
                           className={`form-control ${billingErrors.fullName ? 'is-invalid' : ''}`}
                           name="fullName"
@@ -365,10 +385,22 @@ const ProductDetails = () => {
               </div>
             </div>
           </div>
+          <style>{`
+            @media (max-width: 600px) {
+              .modal-content {
+                padding: 8px !important;
+                font-size: 0.98rem;
+              }
+            }
+          `}</style>
         </div>
       )}
     </div>
   );
+};
+
+ProductDetails.propTypes = {
+  // If ProductDetails receives props, define them here. If not, leave this as an empty object.
 };
 
 export default ProductDetails;

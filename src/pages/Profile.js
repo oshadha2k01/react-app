@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FaUserEdit, FaTrash, FaSave, FaSignOutAlt, FaUserCircle, FaTimesCircle } from 'react-icons/fa';
+import PropTypes from 'prop-types';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Profile = () => {
   const [username, setUsername] = useState(user?.username || '');
   const [password, setPassword] = useState(user?.password || '');
   const [errors, setErrors] = useState({});
+  const firstInputRef = useRef();
 
   useEffect(() => {
     if (!user) {
@@ -26,6 +28,20 @@ const Profile = () => {
       navigate('/login');
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    if (showModal && firstInputRef.current) {
+      firstInputRef.current.focus();
+    }
+    function handleEsc(e) {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+        setEditMode(false);
+      }
+    }
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [showModal]);
 
   const validate = () => {
     const errs = {};
@@ -131,6 +147,9 @@ const Profile = () => {
       {showModal && (
         <div
           className="modal fade show"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="editProfileTitle"
           style={{
             display: 'block',
             background: 'rgba(0,0,0,0.5)',
@@ -140,10 +159,10 @@ const Profile = () => {
           }}
           tabIndex="-1"
         >
-          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 500, margin: 'auto', width: '95%' }}>
-            <div className="modal-content" style={{ borderRadius: 18, boxShadow: '0 8px 32px rgba(24,90,219,0.15)' }}>
+          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 500, width: '100%', maxWidth: '95vw', margin: 'auto' }}>
+            <div className="modal-content" style={{ borderRadius: 18, boxShadow: '0 8px 32px rgba(24,90,219,0.15)', padding: 16, maxHeight: '90vh', overflowY: 'auto' }}>
               <div className="modal-header border-0 pb-0" style={{ position: 'relative' }}>
-                <h4 className="modal-title fw-bold" style={{ color: '#185adb' }}>Edit Profile</h4>
+                <h4 id="editProfileTitle" className="modal-title fw-bold" style={{ color: '#185adb' }}>Edit Profile</h4>
                 <button
                   type="button"
                   className="btn btn-link p-0"
@@ -159,6 +178,7 @@ const Profile = () => {
                   <div className="mb-3">
                     <label className="form-label fw-semibold">Name</label>
                     <input
+                      ref={firstInputRef}
                       className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                       value={name}
                       onChange={e => setName(e.target.value)}
@@ -200,10 +220,22 @@ const Profile = () => {
               </div>
             </div>
           </div>
+          <style>{`
+            @media (max-width: 600px) {
+              .modal-content {
+                padding: 8px !important;
+                font-size: 0.98rem;
+              }
+            }
+          `}</style>
         </div>
       )}
     </div>
   );
+};
+
+Profile.propTypes = {
+  // If Profile receives props, define them here. If not, leave this as an empty object.
 };
 
 export default Profile;

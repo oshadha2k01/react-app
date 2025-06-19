@@ -2,6 +2,7 @@ import React from 'react';
 import { FaCartPlus, FaHeart } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 const getCurrentUserKey = (type) => {
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -82,6 +83,19 @@ const ProductCard = ({ product }) => {
   };
 
   const handleBuy = () => {
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    if (!isAuthenticated) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Please Login',
+        text: 'You must be logged in to buy products.',
+        timer: 1800,
+        showConfirmButton: false,
+      }).then(() => {
+        navigate(`/login?redirect=/product/${product.id}`);
+      });
+      return;
+    }
     navigate(`/product/${product.id}`);
   };
 
@@ -162,6 +176,17 @@ const ProductCard = ({ product }) => {
       </style>
     </div>
   );
+};
+
+ProductCard.propTypes = {
+  product: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    title: PropTypes.string.isRequired,
+    price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    image: PropTypes.string.isRequired,
+    category: PropTypes.string,
+    // Add other product fields as needed
+  }).isRequired,
 };
 
 export default ProductCard;

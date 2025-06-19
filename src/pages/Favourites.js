@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import { FaTrashAlt } from 'react-icons/fa';
+import Swal from 'sweetalert2';
 
 const getCurrentUserKey = () => {
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -18,6 +21,22 @@ const Favourites = () => {
     }
   }, []);
 
+  const handleRemoveFavourite = (id) => {
+    const key = getCurrentUserKey();
+    const updatedFavs = favourites.filter(item => item.id !== id);
+    setFavourites(updatedFavs);
+    if (key) {
+      localStorage.setItem(key, JSON.stringify(updatedFavs));
+    }
+    Swal.fire({
+      icon: 'success',
+      title: 'Removed!',
+      text: 'Product removed from favourites.',
+      timer: 1200,
+      showConfirmButton: false,
+    });
+  };
+
   return (
     <div className="container">
       <h3 className="mb-4 text-center">My Favourites</h3>
@@ -35,6 +54,14 @@ const Favourites = () => {
                     <div className="text-muted">${item.price}</div>
                   </div>
                   <div className="fw-bold fs-5">{item.category}</div>
+                  <button
+                    className="btn btn-link text-danger ms-2"
+                    title="Remove from Favourites"
+                    style={{ fontSize: 20 }}
+                    onClick={() => handleRemoveFavourite(item.id)}
+                  >
+                    <FaTrashAlt />
+                  </button>
                 </li>
               ))}
             </ul>
@@ -43,6 +70,10 @@ const Favourites = () => {
       )}
     </div>
   );
+};
+
+Favourites.propTypes = {
+  // If Favourites receives props, define them here. If not, leave this as an empty object.
 };
 
 export default Favourites;

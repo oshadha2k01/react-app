@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Swal from 'sweetalert2';
-import { FaTimesCircle } from 'react-icons/fa';
+import { FaTimesCircle, FaTrashAlt } from 'react-icons/fa';
 import jsPDF from 'jspdf';
+import PropTypes from 'prop-types';
 
 const paymentOptions = [
   { value: 'credit', label: 'Credit Card' },
@@ -31,6 +32,7 @@ const Cart = () => {
     address: ''
   });
   const [billingErrors, setBillingErrors] = useState({});
+  const firstInputRef = useRef();
 
   // Load cart for current user
   useEffect(() => {
@@ -56,6 +58,19 @@ const Cart = () => {
       localStorage.setItem(key, JSON.stringify(cart));
     }
   }, [cart]);
+
+  useEffect(() => {
+    if (showModal && firstInputRef.current) {
+      firstInputRef.current.focus();
+    }
+    function handleEsc(e) {
+      if (e.key === 'Escape' && showModal) {
+        setShowModal(false);
+      }
+    }
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [showModal]);
 
   const getTotal = () =>
     cart.reduce((sum, item) => sum + item.price * (quantities[item.id] || 1), 0);
@@ -174,6 +189,18 @@ const Cart = () => {
     // Optionally, clear cart or redirect
   };
 
+  const handleRemoveFromCart = (id) => {
+    const updatedCart = cart.filter(item => item.id !== id);
+    setCart(updatedCart);
+    Swal.fire({
+      icon: 'success',
+      title: 'Removed!',
+      text: 'Product removed from cart.',
+      timer: 1200,
+      showConfirmButton: false,
+    });
+  };
+
   return (
     <div className="container">
       <h3 className="mb-4 text-center">My Cart</h3>
@@ -191,6 +218,22 @@ const Cart = () => {
                     <div className="text-muted">${item.price} x {quantities[item.id] || 1}</div>
                   </div>
                   <div className="fw-bold fs-5">${(item.price * (quantities[item.id] || 1)).toFixed(2)}</div>
+                  <input
+                    type="number"
+                    min={1}
+                    value={quantities[item.id] || 1}
+                    onChange={e => handleQuantityChange(item.id, e.target.value)}
+                    className="form-control"
+                    style={{ width: 70, marginRight: 8 }}
+                  />
+                  <button
+                    className="btn btn-link text-danger ms-3"
+                    title="Remove from Cart"
+                    style={{ fontSize: 20 }}
+                    onClick={() => handleRemoveFromCart(item.id)}
+                  >
+                    <FaTrashAlt />
+                  </button>
                 </li>
               ))}
             </ul>
@@ -213,6 +256,9 @@ const Cart = () => {
       {showModal && (
         <div
           className="modal fade show"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cartBillingModalTitle"
           style={{
             display: 'block',
             background: 'rgba(0,0,0,0.5)',
@@ -222,10 +268,10 @@ const Cart = () => {
           }}
           tabIndex="-1"
         >
-          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 1100, margin: 'auto', width: '95%' }}>
-            <div className="modal-content" style={{ borderRadius: 18, boxShadow: '0 8px 32px rgba(24,90,219,0.15)' }}>
+          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 1100, width: '100%', maxWidth: '98vw', margin: 'auto' }}>
+            <div className="modal-content" style={{ borderRadius: 18, boxShadow: '0 8px 32px rgba(24,90,219,0.15)', padding: 16, maxHeight: '90vh', overflowY: 'auto' }}>
               <div className="modal-header border-0 pb-0" style={{ position: 'relative' }}>
-                <h4 className="modal-title fw-bold" style={{ color: '#185adb' }}>Billing & Confirmation</h4>
+                <h4 id="cartBillingModalTitle" className="modal-title fw-bold" style={{ color: '#185adb' }}>Billing & Confirmation</h4>
                 <button
                   type="button"
                   className="btn btn-link p-0"
@@ -271,6 +317,7 @@ const Cart = () => {
                       <div className="mb-2">
                         <label className="form-label">Full Name</label>
                         <input
+                          ref={firstInputRef}
                           type="text"
                           className={`form-control ${billingErrors.fullName ? 'is-invalid' : ''}`}
                           name="fullName"
@@ -406,10 +453,22 @@ const Cart = () => {
               </div>
             </div>
           </div>
+          <style>{`
+            @media (max-width: 600px) {
+              .modal-content {
+                padding: 8px !important;
+                font-size: 0.98rem;
+              }
+            }
+          `}</style>
         </div>
       )}
     </div>
   );
+};
+
+Cart.propTypes = {
+  // If Cart receives props, define them here. If not, leave this as an empty object.
 };
 
 export default Cart;

@@ -10,15 +10,19 @@ import Profile from '././pages/Profile';
 import ProductDetails from '././pages/ProductDetails';
 import Cart from '././pages/Cart';
 import Favourites from '././pages/Favourites';
+import PrivateRoute from './components/PrivateRoute';
 
 const categories = [...new Set(products.map(p => p.category))];
 
 const App = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchValue, setSearchValue] = useState('');
 
-  const filteredProducts = selectedCategory
-    ? products.filter(p => p.category === selectedCategory)
-    : products;
+  const filteredProducts = products.filter(p => {
+    const matchesCategory = selectedCategory ? p.category === selectedCategory : true;
+    const matchesSearch = p.title.toLowerCase().includes(searchValue.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <Router>
@@ -33,6 +37,8 @@ const App = () => {
                   categories={categories}
                   selectedCategory={selectedCategory}
                   onCategoryChange={setSelectedCategory}
+                  searchValue={searchValue}
+                  onSearchChange={setSearchValue}
                 />
                 <div className="row">
                   {filteredProducts.map(product => (
@@ -44,10 +50,10 @@ const App = () => {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/favourites" element={<Favourites />} />
+          <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
+          <Route path="/favourites" element={<PrivateRoute><Favourites /></PrivateRoute>} />
         </Routes>
       </div>
     </Router>

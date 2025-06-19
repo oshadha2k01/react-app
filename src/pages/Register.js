@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import PropTypes from 'prop-types';
 
 const validateName = name => {
   if (!name) return 'Name is required';
@@ -137,6 +138,10 @@ const Register = () => {
       </form>
     </div>
   );
+};
+
+Register.propTypes = {
+  // If Register receives props, define them here. If not, leave this as an empty object.
 };
 
 export default Register;
