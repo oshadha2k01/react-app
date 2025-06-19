@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import PropTypes from 'prop-types';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const validateUsername = username => {
   if (!username) return 'Username is required';
@@ -23,6 +24,7 @@ const Login = () => {
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(window.location.search);
   const redirect = searchParams.get('redirect');
@@ -99,15 +101,27 @@ const Login = () => {
         </div>
         <div className="mb-3">
           <label className="form-label">Password</label>
-          <input
-            type="password"
-            className={`form-control ${passwordError && submitted ? 'is-invalid' : ''}`}
-            value={password}
-            onChange={handlePasswordChange}
-          />
-          {passwordError && (
-            <div className="invalid-feedback">{passwordError}</div>
-          )}
+          <div className="input-group">
+            <input
+              type={showPassword ? "text" : "password"}
+              className={`form-control ${passwordError && submitted ? 'is-invalid' : ''}`}
+              value={password}
+              onChange={handlePasswordChange}
+            />
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              tabIndex={-1}
+              onClick={() => setShowPassword(v => !v)}
+              style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+            {passwordError && (
+              <div className="invalid-feedback d-block">{passwordError}</div>
+            )}
+          </div>
         </div>
         <button className="btn btn-primary w-100" type="submit">
           Login

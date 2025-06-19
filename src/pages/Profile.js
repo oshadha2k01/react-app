@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { FaUserEdit, FaTrash, FaSave, FaSignOutAlt, FaUserCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaUserEdit, FaTrash, FaSave, FaSignOutAlt, FaUserCircle, FaTimesCircle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 
 const Profile = () => {
@@ -15,6 +15,7 @@ const Profile = () => {
   const [name, setName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
   const [password, setPassword] = useState(user?.password || '');
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const firstInputRef = useRef();
 
@@ -199,14 +200,26 @@ const Profile = () => {
                   </div>
                   <div className="mb-3">
                     <label className="form-label fw-semibold">Password</label>
-                    <input
-                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                      type="password"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      style={{ background: '#f8f9fa' }}
-                    />
-                    {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+                    <div className="input-group">
+                      <input
+                        className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        style={{ background: '#f8f9fa' }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        tabIndex={-1}
+                        onClick={() => setShowPassword(v => !v)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </button>
+                      {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
+                    </div>
                   </div>
                   <div className="modal-footer border-0 pt-0 d-flex justify-content-between px-0">
                     <button className="btn btn-outline-secondary px-4" type="button" onClick={() => { setShowModal(false); setEditMode(false); }}>
