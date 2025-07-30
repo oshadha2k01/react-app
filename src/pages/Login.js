@@ -82,11 +82,18 @@ const Login = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
     try {
+      const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
+      
+      // Add custom parameters for better OAuth experience
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+      
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      
       // Save user info in localStorage for your app logic
       const userData = {
         name: user.displayName,
@@ -95,14 +102,17 @@ const Login = () => {
         photoURL: user.photoURL,
         google: true
       };
+      
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('currentUser', JSON.stringify(userData));
+      
       // Optionally add to users array if not present
       let users = JSON.parse(localStorage.getItem('users')) || [];
       if (!users.find(u => u.username === user.email)) {
         users.push(userData);
         localStorage.setItem('users', JSON.stringify(users));
       }
+      
       Swal.fire({
         icon: 'success',
         title: `Welcome, ${user.displayName || user.email}!`,
@@ -110,6 +120,7 @@ const Login = () => {
         timer: 1500,
         showConfirmButton: false,
       });
+      
       setTimeout(() => {
         if (redirect) {
           navigate(redirect);
@@ -118,10 +129,27 @@ const Login = () => {
         }
       }, 1500);
     } catch (error) {
+      console.error('Google Sign-In Error:', error);
+      
+      let errorMessage = 'Google login failed. Please try again.';
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Login was cancelled. Please try again.';
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'Popup was blocked. Please allow popups for this site and try again.';
+      } else if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = 'This domain is not authorized for Google login. Please contact support.';
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       Swal.fire({
         icon: 'error',
         title: 'Google Login Failed',
-        text: error.message,
+        text: errorMessage,
+        confirmButtonText: 'OK'
       });
     }
   };
