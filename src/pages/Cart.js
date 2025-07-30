@@ -56,6 +56,8 @@ const Cart = () => {
     const key = getCurrentUserKey();
     if (key) {
       localStorage.setItem(key, JSON.stringify(cart));
+      // Notify other components (like NavBar) about cart update
+      window.dispatchEvent(new Event('cartUpdated'));
     }
   }, [cart]);
 

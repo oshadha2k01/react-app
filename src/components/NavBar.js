@@ -4,14 +4,45 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import PropTypes from 'prop-types';
 
+const getCartCount = () => {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) return 0;
+  const key = `cart_${currentUser.username}`;
+  const cart = JSON.parse(localStorage.getItem(key)) || [];
+  return cart.length;
+};
+
 const NavBar = () => {
   const navigate = useNavigate();
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const currentUser = isAuthenticated ? JSON.parse(localStorage.getItem('currentUser')) : null;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(getCartCount());
   const dropdownRef = useRef();
   const mobileMenuRef = useRef();
+
+  // Listen for cart changes using a custom event and storage event
+  useEffect(() => {
+    function updateCartCount() {
+      setCartCount(getCartCount());
+    }
+    // Listen for custom event dispatched on cart update
+    window.addEventListener('cartUpdated', updateCartCount);
+    // Listen for storage changes (other tabs)
+    window.addEventListener('storage', updateCartCount);
+    // Also update on focus (for tab switch)
+    window.addEventListener('focus', updateCartCount);
+
+    // Initial update
+    updateCartCount();
+
+    return () => {
+      window.removeEventListener('cartUpdated', updateCartCount);
+      window.removeEventListener('storage', updateCartCount);
+      window.removeEventListener('focus', updateCartCount);
+    };
+  }, [isAuthenticated, currentUser]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -36,12 +67,33 @@ const NavBar = () => {
   const NavLinks = (
     <>
       <span
-        className="nav-link text-white d-flex align-items-center"
+        className="nav-link text-white d-flex align-items-center position-relative"
         style={{ cursor: 'pointer' }}
         onClick={() => { setMobileMenuOpen(false); navigate('/cart'); }}
       >
         <FaShoppingCart size={20} className="me-1" />
         My Cart
+        {cartCount > 0 && (
+          <span
+            className="badge bg-danger"
+            style={{
+              position: 'absolute',
+              top: -6,
+              right: -18,
+              fontSize: 12,
+              minWidth: 20,
+              height: 20,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+              zIndex: 2
+            }}
+          >
+            {cartCount}
+          </span>
+        )}
       </span>
       <span
         className="nav-link text-white d-flex align-items-center"

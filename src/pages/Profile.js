@@ -44,13 +44,15 @@ const Profile = () => {
     return () => document.removeEventListener('keydown', handleEsc);
   }, [showModal]);
 
+  const isGoogleUser = user && user.google;
+
   const validate = () => {
     const errs = {};
     if (!name || name.length < 2) errs.name = 'Name must be at least 2 characters';
     if (!username || username.length < 3) errs.username = 'Username must be at least 3 characters';
-    if (!password || password.length < 6) errs.password = 'Password must be at least 6 characters';
-    if (password && !/[A-Z]/.test(password)) errs.password = 'Password must contain an uppercase letter';
-    if (password && !/[0-9]/.test(password)) errs.password = 'Password must contain a number';
+    if (!isGoogleUser && (!password || password.length < 6)) errs.password = 'Password must be at least 6 characters';
+    if (!isGoogleUser && password && !/[A-Z]/.test(password)) errs.password = 'Password must contain an uppercase letter';
+    if (!isGoogleUser && password && !/[0-9]/.test(password)) errs.password = 'Password must contain a number';
     return errs;
   };
 
@@ -66,7 +68,10 @@ const Profile = () => {
     if (Object.keys(errs).length > 0) {
       return;
     }
-    const updatedUser = { name, username, password };
+    // For Google users, do not update password
+    const updatedUser = isGoogleUser
+      ? { ...user, name, username }
+      : { name, username, password };
     // Update user in users array
     let users = JSON.parse(localStorage.getItem('users')) || [];
     users = users.map(u =>
@@ -131,7 +136,7 @@ const Profile = () => {
         <>
           <div className="mb-3"><strong>Name:</strong> {user.name}</div>
           <div className="mb-3"><strong>Username:</strong> {user.username}</div>
-          <div className="mb-3"><strong>Password:</strong> ******</div>
+          <div className="mb-3"><strong>Password:</strong> {isGoogleUser ? <span className="text-muted">Google Account</span> : '******'}</div>
           <button className="btn btn-primary w-100 mb-2 d-flex align-items-center justify-content-center" onClick={handleEdit}>
             <FaUserEdit className="me-2" /> Edit Profile
           </button>
@@ -185,6 +190,7 @@ const Profile = () => {
                       onChange={e => setName(e.target.value)}
                       autoFocus
                       style={{ background: '#f8f9fa' }}
+                      disabled={isGoogleUser}
                     />
                     {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                   </div>
@@ -195,40 +201,48 @@ const Profile = () => {
                       value={username}
                       onChange={e => setUsername(e.target.value)}
                       style={{ background: '#f8f9fa' }}
+                      disabled={isGoogleUser}
                     />
                     {errors.username && <div className="invalid-feedback">{errors.username}</div>}
                   </div>
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold">Password</label>
-                    <div className="input-group">
-                      <input
-                        className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        style={{ background: '#f8f9fa' }}
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary"
-                        tabIndex={-1}
-                        onClick={() => setShowPassword(v => !v)}
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
-                      >
-                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                      </button>
-                      {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
+                  {!isGoogleUser && (
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Password</label>
+                      <div className="input-group">
+                        <input
+                          className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          style={{ background: '#f8f9fa' }}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary"
+                          tabIndex={-1}
+                          onClick={() => setShowPassword(v => !v)}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                        {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="modal-footer border-0 pt-0 d-flex justify-content-between px-0">
                     <button className="btn btn-outline-secondary px-4" type="button" onClick={() => { setShowModal(false); setEditMode(false); }}>
                       Cancel
                     </button>
-                    <button className="btn btn-primary px-4" type="submit">
+                    <button className="btn btn-primary px-4" type="submit" disabled={isGoogleUser}>
                       <FaSave className="me-2" /> Save
                     </button>
                   </div>
+                  {isGoogleUser && (
+                    <div className="alert alert-info mt-2 mb-0 py-2 px-3" style={{ fontSize: 14 }}>
+                      Google users cannot edit profile fields.
+                    </div>
+                  )}
                 </form>
               </div>
             </div>

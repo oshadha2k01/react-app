@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaCartPlus, FaHeart } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,18 @@ const getCurrentUserKey = (type) => {
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+  const [isFavourite, setIsFavourite] = useState(false);
+
+  // Check if product is in favourites on mount or when product changes
+  useEffect(() => {
+    const key = getCurrentUserKey('favourites');
+    if (key) {
+      const favs = JSON.parse(localStorage.getItem(key)) || [];
+      setIsFavourite(!!favs.find(item => item.id === product.id));
+    } else {
+      setIsFavourite(false);
+    }
+  }, [product]);
 
   const handleAddToCart = () => {
     const key = getCurrentUserKey('cart');
@@ -29,6 +41,8 @@ const ProductCard = ({ product }) => {
     if (!exists) {
       cart.push({ ...product, quantity: 1 });
       localStorage.setItem(key, JSON.stringify(cart));
+      // Dispatch cartUpdated event for NavBar badge update
+      window.dispatchEvent(new Event('cartUpdated'));
       Swal.fire({
         icon: 'success',
         title: 'Added to Cart!',
@@ -64,6 +78,7 @@ const ProductCard = ({ product }) => {
     if (!exists) {
       favs.push(product);
       localStorage.setItem(key, JSON.stringify(favs));
+      setIsFavourite(true);
       Swal.fire({
         icon: 'success',
         title: 'Added to Favourites!',
@@ -72,10 +87,14 @@ const ProductCard = ({ product }) => {
         showConfirmButton: false,
       });
     } else {
+      // Remove from favourites if already exists (toggle)
+      favs = favs.filter(item => item.id !== product.id);
+      localStorage.setItem(key, JSON.stringify(favs));
+      setIsFavourite(false);
       Swal.fire({
         icon: 'info',
-        title: 'Already in Favourites',
-        text: `${product.title} is already in your favourites.`,
+        title: 'Removed from Favourites',
+        text: `${product.title} has been removed from your favourites.`,
         timer: 1200,
         showConfirmButton: false,
       });
@@ -117,11 +136,15 @@ const ProductCard = ({ product }) => {
               <FaCartPlus size={16} color="#185adb" />
             </button>
             <button
-              className="btn btn-light btn-sm rounded-circle shadow-sm"
-              title="Add to Favourites"
+              className={`btn btn-light btn-sm rounded-circle shadow-sm ${isFavourite ? 'favourite-active' : ''}`}
+              title={isFavourite ? "Remove from Favourites" : "Add to Favourites"}
               onClick={handleAddToFavourites}
+              style={{
+                background: isFavourite ? '#ffeaea' : undefined,
+                borderColor: isFavourite ? '#ea4335' : undefined
+              }}
             >
-              <FaHeart size={16} color="#185adb" />
+              <FaHeart size={16} color={isFavourite ? "#ea4335" : "#185adb"} />
             </button>
           </div>
         </div>
@@ -168,6 +191,14 @@ const ProductCard = ({ product }) => {
           .product-icons button {
             background: rgba(255,255,255,0.95);
             border: none;
+          }
+          .product-icons button.favourite-active,
+          .product-icons button.favourite-active:hover {
+            background: #ffeaea !important;
+            border: 1.5px solid #ea4335 !important;
+          }
+          .product-icons button.favourite-active svg {
+            color: #ea4335 !important;
           }
           .product-icons button:hover svg {
             color: #0a2342;
