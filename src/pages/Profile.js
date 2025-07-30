@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { FaUserEdit, FaTrash, FaSave, FaSignOutAlt, FaUserCircle, FaTimesCircle, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaUserEdit, FaTrash, FaSave, FaSignOutAlt, FaUserCircle, FaTimesCircle, FaEye, FaEyeSlash, FaArrowLeft, FaRegEdit, FaRegTrashAlt, FaUser } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 
 const Profile = () => {
@@ -127,28 +127,45 @@ const Profile = () => {
 
   return (
     <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '70vh' }}>
-      <div className="p-4 rounded shadow w-100" style={{ maxWidth: 420, background: '#fff' }}>
+      <div className="p-4 rounded shadow w-100" style={{ maxWidth: 420, background: '#fff', borderRadius: 18, boxShadow: '0 4px 24px rgba(24,90,219,0.10)' }}>
         <div className="d-flex flex-column align-items-center mb-4">
-          <FaUserCircle size={70} color="#185adb" />
-          <h3 className="mt-2 mb-0">{user.name}</h3>
-          <div className="text-muted">@{user.username}</div>
+
+          <h3 className="mt-2 mb-0 " style={{ fontWeight: 700 , color: '#1a1a1a'}}>{user.name}</h3>
+
         </div>
-        <>
-          <div className="mb-3"><strong>Name:</strong> {user.name}</div>
-          <div className="mb-3"><strong>Username:</strong> {user.username}</div>
-          <div className="mb-3"><strong>Password:</strong> {isGoogleUser ? <span className="text-muted">Google Account</span> : '******'}</div>
-          <button className="btn btn-primary w-100 mb-2 d-flex align-items-center justify-content-center" onClick={handleEdit}>
-            <FaUserEdit className="me-2" /> Edit Profile
+        <div className="mb-3 d-flex align-items-center">
+           <strong>Name:</strong> <span className="ms-2">{user.name}</span>
+        </div>
+        <div className="mb-3 d-flex align-items-center">
+           <strong>Username:</strong> <span className="ms-2">{user.username}</span>
+        </div>
+        <div className="mb-3 d-flex align-items-center">
+           <strong>Password:</strong> <span className="ms-2">{isGoogleUser ? <span className="text-muted">Google Account</span> : '******'}</span>
+        </div>
+        <div className="d-flex flex-column gap-2 mt-3">
+          <button
+            className="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center"
+            style={{ fontWeight: 400, fontSize: 16, borderRadius: 8 }}
+            onClick={handleEdit}
+          >
+            <FaRegEdit className="me-2" /> Edit Profile
           </button>
-          <button className="btn btn-danger w-100 mb-2 d-flex align-items-center justify-content-center" onClick={handleDelete}>
-            <FaTrash className="me-2" /> Delete Account
+          <button
+            className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center"
+            style={{ fontWeight: 400, fontSize: 16, borderRadius: 8 }}
+            onClick={handleDelete}
+          >
+            <FaRegTrashAlt className="me-2" /> Delete Account
           </button>
-          <button className="btn btn-secondary w-100 d-flex align-items-center justify-content-center" onClick={handleLogout}>
+          <button
+            className="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center"
+            style={{ fontWeight: 400, fontSize: 16, borderRadius: 8 }}
+            onClick={handleLogout}
+          >
             <FaSignOutAlt className="me-2" /> Logout
           </button>
-        </>
+        </div>
       </div>
-
       {/* Modal for Edit Profile */}
       {showModal && (
         <div
@@ -165,10 +182,16 @@ const Profile = () => {
           }}
           tabIndex="-1"
         >
-          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 500, width: '100%', maxWidth: '95vw', margin: 'auto' }}>
+          <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 400, width: '100%', margin: 'auto' }}>
             <div className="modal-content" style={{ borderRadius: 18, boxShadow: '0 8px 32px rgba(24,90,219,0.15)', padding: 16, maxHeight: '90vh', overflowY: 'auto' }}>
               <div className="modal-header border-0 pb-0" style={{ position: 'relative' }}>
-                <h4 id="editProfileTitle" className="modal-title fw-bold" style={{ color: '#185adb' }}>Edit Profile</h4>
+                <h4
+                  id="editProfileTitle"
+                  className="modal-title fw-bold w-100 text-center"
+                  style={{ color: '#222', fontWeight: 700 }}
+                >
+                  Edit Profile
+                </h4>
                 <button
                   type="button"
                   className="btn btn-link p-0"
@@ -208,24 +231,39 @@ const Profile = () => {
                   {!isGoogleUser && (
                     <div className="mb-3">
                       <label className="form-label fw-semibold">Password</label>
-                      <div className="input-group">
+                      <div className="position-relative">
                         <input
                           className={`form-control ${errors.password ? 'is-invalid' : ''}`}
                           type={showPassword ? "text" : "password"}
                           value={password}
                           onChange={e => setPassword(e.target.value)}
-                          style={{ background: '#f8f9fa' }}
+                          style={{ background: '#f8f9fa', paddingRight: 40 }}
                         />
-                        <button
-                          type="button"
-                          className="btn btn-outline-secondary"
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: '50%',
+                            right: 10,
+                            transform: 'translateY(-50%)',
+                            zIndex: 2,
+                            color: '#888',
+                            fontSize: 22,
+                            background: 'none',
+                            border: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            height: '100%',
+                            cursor: 'pointer'
+                          }}
+                          onClick={() => {
+                            setShowPassword(true);
+                            setTimeout(() => setShowPassword(false), 1500);
+                          }}
                           tabIndex={-1}
-                          onClick={() => setShowPassword(v => !v)}
                           aria-label={showPassword ? "Hide password" : "Show password"}
-                          style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                         >
                           {showPassword ? <FaEyeSlash /> : <FaEye />}
-                        </button>
+                        </span>
                         {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
                       </div>
                     </div>
@@ -234,8 +272,19 @@ const Profile = () => {
                     <button className="btn btn-outline-secondary px-4" type="button" onClick={() => { setShowModal(false); setEditMode(false); }}>
                       Cancel
                     </button>
-                    <button className="btn btn-primary px-4" type="submit" disabled={isGoogleUser}>
-                      <FaSave className="me-2" /> Save
+                    <button
+                      className="btn btn-primary px-4"
+                      type="submit"
+                      disabled={isGoogleUser}
+                      style={{
+                        fontWeight: 500,
+                        borderRadius: 6,
+                        paddingLeft: 24,
+                        paddingRight: 24,
+                        border: 'none'
+                      }}remove the background color
+                    >
+                      Update Profile
                     </button>
                   </div>
                   {isGoogleUser && (

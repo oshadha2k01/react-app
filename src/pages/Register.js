@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import PropTypes from 'prop-types';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 
 const validateName = name => {
   if (!name) return 'Name is required';
@@ -33,6 +33,10 @@ const Register = () => {
   const [passwordError, setPasswordError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const showPasswordTemporarily = () => {
+    setShowPassword(true);
+    setTimeout(() => setShowPassword(false), 1500);
+  };
   const navigate = useNavigate();
 
   const handleNameChange = e => {
@@ -92,7 +96,7 @@ const Register = () => {
         onSubmit={handleSubmit}
         noValidate
       >
-        <h3 className="mb-3 text-center">Register</h3>
+        <h3 className="mb-3 text-center">Create Account</h3>
         <div className="mb-3">
           <label className="form-label">Name</label>
           <input
@@ -120,23 +124,36 @@ const Register = () => {
         </div>
         <div className="mb-3">
           <label className="form-label">Password</label>
-          <div className="input-group">
+          <div className="position-relative">
             <input
               type={showPassword ? "text" : "password"}
               className={`form-control ${passwordError && submitted ? 'is-invalid' : ''}`}
               value={password}
               onChange={handlePasswordChange}
+              style={{ paddingRight: 40 }}
             />
-            <button
-              type="button"
-              className="btn btn-outline-secondary"
+            <span
+              style={{
+                position: 'absolute',
+                top: '50%',
+                right: 10,
+                transform: 'translateY(-50%)',
+                zIndex: 2,
+                color: '#888',
+                fontSize: 22,
+                background: 'none',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                height: '100%',
+                cursor: 'pointer'
+              }}
+              onClick={showPasswordTemporarily}
               tabIndex={-1}
-              onClick={() => setShowPassword(v => !v)}
-              style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
+              {showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
+            </span>
             {passwordError && (
               <div className="invalid-feedback d-block">{passwordError}</div>
             )}
@@ -147,7 +164,7 @@ const Register = () => {
         </button>
         <div className="mt-3 text-center">
           Have your account?{' '}
-          <Link to="/login">SignIn</Link>
+          <Link to="/login" className="text-decoration-none">Login</Link>
         </div>
       </form>
     </div>

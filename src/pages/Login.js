@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import PropTypes from 'prop-types';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { FcGoogle } from 'react-icons/fc';
-// Add Firebase imports
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { app } from '../firebase'; // Make sure you have firebase.js configured and exported as 'app'
+import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
+import { FcGoogle } from 'react-icons/fc';
 
 const validateUsername = username => {
   if (!username) return 'Username is required';
@@ -29,6 +28,10 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const showPasswordTemporarily = () => {
+    setShowPassword(true);
+    setTimeout(() => setShowPassword(false), 1500);
+  };
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(window.location.search);
   const redirect = searchParams.get('redirect');
@@ -178,23 +181,36 @@ const Login = () => {
         </div>
         <div className="mb-3">
           <label className="form-label">Password</label>
-          <div className="input-group">
+          <div className="position-relative">
             <input
               type={showPassword ? "text" : "password"}
               className={`form-control ${passwordError && submitted ? 'is-invalid' : ''}`}
               value={password}
               onChange={handlePasswordChange}
+              style={{ paddingRight: 40 }}
             />
-            <button
-              type="button"
-              className="btn btn-outline-secondary"
+            <span
+              style={{
+                position: 'absolute',
+                top: '50%', // increased from 50% for more top margin
+                right: 10,
+                transform: 'translateY(-50%)',
+                zIndex: 2,
+                color: '#888',
+                fontSize: 22,
+                background: 'none',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                height: '100%',
+                cursor: 'pointer'
+              }}
+              onClick={showPasswordTemporarily}
               tabIndex={-1}
-              onClick={() => setShowPassword(v => !v)}
-              style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
+              {showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
+            </span>
             {passwordError && (
               <div className="invalid-feedback d-block">{passwordError}</div>
             )}
@@ -236,7 +252,7 @@ const Login = () => {
 
         <div className="mt-3 text-center">
           Haven't your account?{' '}
-          <Link to="/register">Signup</Link>
+          <Link to="/register" className="text-decoration-none">Register</Link>
         </div>
       </form>
     </div>
@@ -247,3 +263,4 @@ Login.propTypes = {
 };
 
 export default Login;
+
